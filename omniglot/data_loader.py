@@ -246,7 +246,7 @@ def get_one_shot_batch(support_set_size, is_validation):
     if number_of_characters < number_of_support_characters:
         number_of_support_characters = number_of_characters
         
-    support_characters_indexes = random.sample(range(0, number_of_characters -1), number_of_support_characters - 2)
+    support_characters_indexes = random.sample(range(0, number_of_characters -1), number_of_support_characters - 1)
     
     for index in support_characters_indexes:
         current_character = different_characters[index]
