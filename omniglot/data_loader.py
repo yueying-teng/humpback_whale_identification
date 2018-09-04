@@ -261,18 +261,20 @@ def get_one_shot_batch(support_set_size, is_validation):
     return images, labels
 
 
+
+
 def one_shot_test(model, support_set_size, number_of_tasks_per_alphabet, is_validation):
     
     """
     one shot task performance evaluation
     input:
     support_set_size: number of **characters** to use in the support set for one-shot tasks
-    number_of_tasks_per_alphabet:
+    number_of_tasks_per_alphabet: number of iterations in running validation or testing for each alphabet 
     return:
     mean_accuracy
 
     """
-    # variables dependent on the data 
+    # variables dependent on the data, validation or testing 
     if is_validation:
         alphabets = __validation_alphabets
         print ('\none shot on validation alphabets:')
@@ -286,5 +288,36 @@ def one_shot_test(model, support_set_size, number_of_tasks_per_alphabet, is_vali
     for alphabet in alphabets:
         mean_alphabet_accuracy = 0
         for _ in range(number_of_tasks_per_alphabet):
-    
+            # get batches of validation or testing data with the first two images of the same character and all the others different from the two 
+            images, _ = get_one_shot_batch(support_set_size, is_validation = is_validation)
+            probabilities = model.predict_on_batch(images)
+            
+            # adding the following because sometimes the classifer gives almost the same result for all images, then argmax will always be zero by definition
+            if np.argmax(probabilities) == 0 and probabilities.std() > 0.01:
+                accuracy = 1
+            else:
+                accuracy = 0 # different characters
+                
+            mean_alphabet_accuracy += accuracy
+            mean_global_accuracy += accuracy
+            
+        mean_alphabet_accuracy /= number_of_tasks_per_alphabet        
+        print(alphabet + ' alphabet' + ', accuracy: ' + str(mean_alphabet_accuracy))
+            
+        if is_validation:
+            __current_validation_alphabet_index += 1
+        else:
+            __current_evaluation_alphabet_index += 1
+
+    mean_global_accuracy /= (len(alphabets) * number_of_tasks_per_alphabet)
+    print('\nMean global accuracy: ' + str(mean_global_accuracy))
+
+    # reset counter
+    if is_validation:
+        __current_validation_alphabet_index = 0
+    else:
+        __current_evaluation_alphabet_index = 0
+
+    return mean_global_accuracy
+
     
