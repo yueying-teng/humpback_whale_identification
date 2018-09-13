@@ -11,7 +11,6 @@ train_dictionary = {}
 evaluation_dictionary = {}
 image_width = 105
 image_height = 105
-# batch_size = batch_size
 # use_augmentation = use_augmentation
 __train_alphabets = []
 __validation_alphabets = []
@@ -24,53 +23,63 @@ batch_size = 32
 
 
 
-# load_dataset 
-train_path = os.path.join(dataset_path, 'images_background')
-validation_path = os.path.join(dataset_path, 'images_evaluation')
+def load_dataset(): 
+    train_path = os.path.join(dataset_path, 'images_background')
+    validation_path = os.path.join(dataset_path, 'images_evaluation')
 
-# training alphabets 
-# language folders 
-for alphabet in [i for i in os.listdir(train_path) if '.DS_Store' not in i]:
-    alphabet_path = os.path.join(train_path, alphabet)
+    # training alphabets 
+    # language folders 
+    for alphabet in [i for i in os.listdir(train_path) if '.DS_Store' not in i]:
+        alphabet_path = os.path.join(train_path, alphabet)
+        
+        current_alphabet_dictionary = {}
+        # character folders under each language 
+        for character in [i for i in os.listdir(alphabet_path) if '.DS_Store' not in i]:
+            character_path = os.path.join(alphabet_path, character)
+            current_alphabet_dictionary[character] = os.listdir(character_path)
+
+        train_dictionary[alphabet] = current_alphabet_dictionary
+        
+        
+    # validation alphabets 
+    for alphabet in [i for i in os.listdir(validation_path) if '.DS_Store' not in i]:
+        alphabet_path = os.path.join(validation_path, alphabet)
+        
+        current_alphabet_dictionary = {}
+        # character folders under each language 
+        for character in [i for i in os.listdir(alphabet_path) if '.DS_Store' not in i]:
+            character_path = os.path.join(alphabet_path, character)
+            current_alphabet_dictionary[character] = os.listdir(character_path)
+
+        evaluation_dictionary[alphabet] = current_alphabet_dictionary
+
+    return train_dictionary, evaluation_dictionary
+
+
+
+def split_train_datasets():
+    # train validation split 24 vs 6
+
+    available_alphabets = list(train_dictionary.keys())
+    number_of_alphabets = len(available_alphabets)
+
+    train_indexes = random.sample(range(0, number_of_alphabets -1), int(0.8* number_of_alphabets))
+
+    # sort indexes in reverse order and pop them out from the list so that the original index order is not changed
+    train_indexes.sort(reverse = True)
+    for index in train_indexes:
+        __train_alphabets.append(available_alphabets[index])
+        available_alphabets.pop(index)
+
+    __validation_alphabets = available_alphabets
+    __evaluation_alphabets = list(evaluation_dictionary.keys())
+
+    return __train_alphabets, __validation_alphabets, __evaluation_alphabets
     
-    current_alphabet_dictionary = {}
-    # character folders under each language 
-    for character in [i for i in os.listdir(alphabet_path) if '.DS_Store' not in i]:
-        character_path = os.path.join(alphabet_path, character)
-        current_alphabet_dictionary[character] = os.listdir(character_path)
 
-    train_dictionary[alphabet] = current_alphabet_dictionary
+train_dictionary, evaluation_dictionary = load_dataset()
+__train_alphabets, __validation_alphabets, __evaluation_alphabets = split_train_datasets()
     
-    
-# validation alphabets 
-for alphabet in [i for i in os.listdir(validation_path) if '.DS_Store' not in i]:
-    alphabet_path = os.path.join(validation_path, alphabet)
-    
-    current_alphabet_dictionary = {}
-    # character folders under each language 
-    for character in [i for i in os.listdir(alphabet_path) if '.DS_Store' not in i]:
-        character_path = os.path.join(alphabet_path, character)
-        current_alphabet_dictionary[character] = os.listdir(character_path)
-
-    evaluation_dictionary[alphabet] = current_alphabet_dictionary
-
-
-# split_train_datasets
-# train validation split 24 vs 6
-
-available_alphabets = list(train_dictionary.keys())
-number_of_alphabets = len(available_alphabets)
-
-train_indexes = random.sample(range(0, number_of_alphabets -1), int(0.8* number_of_alphabets))
-
-# sort indexes in reverse order and pop them out from the list so that the original index order is not changed
-train_indexes.sort(reverse = True)
-for index in train_indexes:
-    __train_alphabets.append(available_alphabets[index])
-    available_alphabets.pop(index)
-
-__validation_alphabets = available_alphabets
-__evaluation_alphabets = list(evaluation_dictionary.keys())
 
 
 def __convert_path_list_to_images_and_labels (path_list, is_one_shot_task):
@@ -274,6 +283,11 @@ def one_shot_test(model, support_set_size, number_of_tasks_per_alphabet, is_vali
     mean_accuracy
 
     """
+
+    global __current_validation_alphabet_index
+    global __current_evaluation_alphabet_index
+    
+
     # variables dependent on the data, validation or testing 
     if is_validation:
         alphabets = __validation_alphabets

@@ -19,12 +19,38 @@ import modified_sgd
 
 
 input_shape = (105, 105, 1)
-# model = []
+model = []
 # Path where the logs will be saved
 tensorboard_log_path = './log'
 summary_writer = tf.summary.FileWriter(tensorboard_log_path)
 
 learning_rate = 10e-4
+batch_size = 32
+
+# Learning Rate multipliers for each layer
+learning_rate_multipliers = {}
+learning_rate_multipliers['Conv1'] = 1
+learning_rate_multipliers['Conv2'] = 1
+learning_rate_multipliers['Conv3'] = 1
+learning_rate_multipliers['Conv4'] = 1
+learning_rate_multipliers['Dense1'] = 1
+# l2-regularization penalization for each layer
+l2_penalization = {}
+l2_penalization['Conv1'] = 1e-2
+l2_penalization['Conv2'] = 1e-2
+l2_penalization['Conv3'] = 1e-2
+l2_penalization['Conv4'] = 1e-2
+l2_penalization['Dense1'] = 1e-4
+
+
+momentum = 0.9
+# linear epoch slope evolution
+momentum_slope = 0.01
+support_set_size = 20
+evaluate_each = 1000
+number_of_train_iterations = 1000000
+
+
 
 
 
@@ -109,6 +135,7 @@ def __write_logs_to_tensorboard(current_iteration, train_losses, train_accuracie
         summary_writer.flush()
         
 
+model = __construct_siamese_architecture(learning_rate_multipliers = learning_rate_multipliers, l2_regularization_penalization = l2_penalization)
 
 
 def train_siamese_network(number_of_iterations, support_set_size, final_momentum, momentum_slope, evaluate_each, model_name):
@@ -124,7 +151,7 @@ def train_siamese_network(number_of_iterations, support_set_size, final_momentum
     
     # train test split the 30 alphabets into training and validation
     # data_loader.split_train_datasets()
-    __train_alphabets, __validation_alphabets, __evaluation_alphabets = data_loader.split_train_datasets()
+    # __train_alphabets, __validation_alphabets, __evaluation_alphabets = data_loader.split_train_datasets()
     
     # store 100 iterations of losses and accuracies, after evaluate_each iterations, these will be passed to tensorboard logs
     train_losses = np.zeros((evaluate_each))
@@ -167,9 +194,9 @@ def train_siamese_network(number_of_iterations, support_set_size, final_momentum
             count = 0
 
             if (validation_accuracy == 1.0 and train_accuracy == 0.5):
-                        print('Early Stopping: Gradient Explosion')
-                        print('Validation Accuracy = ' + str(best_validation_accuracy))
-                        return 0
+                print('Early Stopping: Gradient Explosion')
+                print('Validation Accuracy = ' + str(best_validation_accuracy))
+                return 0
 
             elif train_accuracy == 0.0:
                 return 0
