@@ -47,8 +47,8 @@ momentum = 0.9
 # linear epoch slope evolution
 momentum_slope = 0.01
 support_set_size = 20
-evaluate_each = 1000
-number_of_train_iterations = 1000000
+evaluate_each = 500
+number_of_train_iterations = 100000
 
 
 
@@ -116,7 +116,7 @@ def __write_logs_to_tensorboard(current_iteration, train_losses, train_accuracie
     evaluate_each: number of iterations defined to evaluate the one-shot task
     """
 
-    summary = tf.summary()
+    summary = tf.Summary()
     for index in range(0, evaluate_each):
         value = summary.value.add()
         value.simple_value = train_losses[index]
