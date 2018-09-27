@@ -310,7 +310,7 @@ def one_shot_test(model, support_set_size, number_of_tasks_per_alphabet, is_vali
             if np.argmax(probabilities) == 0 and probabilities.std() > 0.01:
                 accuracy = 1
             else:
-                accuracy = 0 # different characters
+                accuracy = 0 # same characters
                 
             mean_alphabet_accuracy += accuracy
             mean_global_accuracy += accuracy
