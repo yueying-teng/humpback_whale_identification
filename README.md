@@ -1,9 +1,5 @@
 ## siamese network with omniglot data 
-reference 
 
-https://github.com/Goldesel23/Siamese-Networks-for-One-Shot-Learning
-
-https://www.cs.cmu.edu/~rsalakhu/papers/oneshot1.pdf
 
 
 ### omniglot data structure - alphabets, characters, examples 
@@ -25,6 +21,8 @@ test_dict
 
 If the features learned by the model are sufficient to confirm or deny the identity of characters from one set of alphabets, then they ought to be sufficient for other alphabets, provided that the model has been exposed to a variety of alphabets to encourage variance amongst the learned features.
 
+
+
 ### training
 from the 30 alphabets background set, 80% (24) are used for training and 20% (6) are using for validation one-shot tasks
 
@@ -32,10 +30,12 @@ from the 30 alphabets background set, 80% (24) are used for training and 20% (6)
 - in validation, the testing image is paired with each one of the support set images. the pair with the highest probability output is considered the class for the testing image.
 
 
+
 ### testing
 image_evaluation set: 20 alphabets, which is unseen to training data
 
 for each alphabet, one randomly selected testing image is presented 20 images representing the potential unseen classes that can be chosen for the testing image, and these 20 images are the only known examples of each of those classes. 
+
 
 
 ### the way dataset is loaded from images_background and images_evaluation folders: load_dataset()
@@ -55,6 +55,7 @@ for alphabet in [i for i in os.listdir(train_path) if '.DS_Store' not in i]:
 ```
 
 
+
 ### generate batches of training data: get_train_batch()
 
 each batch of training data is made of pairs of images. half of the pairs are made of the same character, while the other half are made of pairs from different characters. **characters in each batch are from the same alphabet**
@@ -68,6 +69,7 @@ selection are done by randomly selecting indices and the stored images are actau
 even pairs are pairs of the same characters, while odd pairs are of different characters 
 
 
+
 ### generate batches of validation or testing data: get_one_shot_batch(support_set_size, is_validation)
 
 each batch is made of support_set_size pairs images. for both validation and testing data, only the first pair is made of the same characters, while all the other images are of different characteres. **characters in each batch are still from the same alphabet**
@@ -75,6 +77,7 @@ each batch is made of support_set_size pairs images. for both validation and tes
 - first select two images from one character under the current alphabet
 - second select one image from charcters different from the one used in pair before. this number of images is decided by support_set_size
 - reorder the images so that the pairs have the following fashion: (A, A), (A, B), (A, C), (A, D)...
+
 
 
 ### evaluating validation or testing accuracy: one_shot_test(model, support_set_size, number_of_tasks_per_alphabet, is_validation)
@@ -90,6 +93,7 @@ for alphabet in alphabets:
         probabilities = model.predict_on_batch(images)
         # print mean_alphabet_accuracy and mean_global_accuracy
 ```
+
 
 
 ### train netwrok with validation during training: train_siamese_network(number_of_iterations, support_set_size, final_momentum, momentum_slope, evaluate_each, model_name)
@@ -111,4 +115,10 @@ for iteration in range(number_of_iterations):
 
 ### test the trained model on testing data: one_shot_test(model, support_set_size, number_of_tasks_per_alphabet, is_validation = False)
 
+
+
+### references 
+- https://github.com/Goldesel23/Siamese-Networks-for-One-Shot-Learning
+
+- https://www.cs.cmu.edu/~rsalakhu/papers/oneshot1.pdf
 
