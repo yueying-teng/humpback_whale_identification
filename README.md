@@ -29,6 +29,8 @@ from the 30 alphabets background set, 80% (24) are used for training and 20% (6)
 - training consists of classifying pairs of images to be the same or different characters. there are equal number of same and different character pairs for each alphabet
 - in validation, the testing image is paired with each one of the support set images. the pair with the highest probability output is considered the class for the testing image.
 
+weighted L1 distance function is learned between the embeddings. this is done by applying L1 distance on the output embeddings then adding one fully connected layer to learn the weighted distance. the loss function used is a regularized cross entropy, where the main aim is to drive similar samples to predict 1, and 0 otherwise. 
+
 
 
 ### testing
