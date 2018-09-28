@@ -221,7 +221,7 @@ def train_siamese_network(number_of_iterations, support_set_size, final_momentum
             print('Validation Accuracy = ' + str(best_validation_accuracy))
             break
 
-    print('Trained Ended!')
+    print('Training Ended!')
     return best_validation_accuracy
 
 
