@@ -85,6 +85,7 @@ __train_alphabets, __validation_alphabets, __evaluation_alphabets = split_train_
 def __convert_path_list_to_images_and_labels (path_list, is_one_shot_task):
     """
     return image in np.array format and corresponding label from the image path 
+
     input:
     path_list: list of images to be loaded in this batch
     is_one_shot_task: if the batch is for one-shot task or for training 
@@ -113,7 +114,7 @@ def __convert_path_list_to_images_and_labels (path_list, is_one_shot_task):
         pairs_of_images[1][pair, :, :, 0] = image
 
         if not is_one_shot_task:
-            # training and validation set 
+            # for training task
             if (pair + 1)% 2 == 0:
                 # pair 1, 3, 5 ... are pairs of different characters 
                 labels[pair] = 0
@@ -122,7 +123,7 @@ def __convert_path_list_to_images_and_labels (path_list, is_one_shot_task):
                 labels[pair] = 1
 
         else:
-            # evaluation set - only the first set has label 1
+            # validation and testing dataset - only the first set has label 1
             if pair == 0:
                 labels[pair] = 1
             else:
@@ -141,7 +142,8 @@ def __convert_path_list_to_images_and_labels (path_list, is_one_shot_task):
 
 def get_train_batch():
     """
-    generate batches of training data. 
+    generate batches of training pairs of images with half of the same classes and the others of different classes 
+
     returns:
     pairs_of_images: pairs of images for the current batch
     labels: 1 for the same character and 0 for different characters 
@@ -164,7 +166,7 @@ def get_train_batch():
         image_path = os.path.join(dataset_path, 'images_background', current_alphabet, current_character)
             
         # randomly select 3 indexes from the same character (note: there are only 20 samples for each character)
-        image_indexes = random.sample(range(0, 19), 3)
+        image_indexes = random.sample(range(0, 20), 3)
         image = os.path.join(image_path, available_images[image_indexes[0]])
         batch_images_path.append(image)
         image = os.path.join(image_path, available_images[image_indexes[1]])
@@ -180,7 +182,7 @@ def get_train_batch():
 
         current_character = different_characters[different_character_index[0]]
         available_images = (train_dictionary[current_alphabet])[current_character]
-        image_indexes = random.sample(range(0, 19), 1)
+        image_indexes = random.sample(range(0, 20), 1)
         image_path = os.path.join(dataset_path, 'images_background', current_alphabet, current_character)
         image = os.path.join(image_path, available_images[image_indexes[0]])
         batch_images_path.append(image)
@@ -201,13 +203,17 @@ def get_train_batch():
 
 def get_one_shot_batch(support_set_size, is_validation):
     """
-    generate one shot batches for evaluation or validation - only the first pair is of the same character 
+    generate one shot batches for evaluation or validation
+    it consists of a single image that will be compared with a support set of images. 
+        
     input:
     support_set_size: number of **characters** to use in the support set for one-shot tasks, evaluation tasks
     is_validation: validation or testing data
     return:
-    images in np.arary format and their corresponding labels
+    the pair of images to be compared in np.arrays by the model and their labels (the first pair is always 1) and the remaining ones are 0's
+    only the first pair is of the same character 
     """
+
     global __current_validation_alphabet_index
     global __current_evaluation_alphabet_index
     
@@ -233,7 +239,7 @@ def get_one_shot_batch(support_set_size, is_validation):
     # get testing image pairs of the same characters first 
     current_character = available_characters[test_character_index[0]]
     available_images = (dictionary[current_alphabet])[current_character] 
-    image_indexes = random.sample(range(0, 19), 2)
+    image_indexes = random.sample(range(0, 20), 2)
     image_path = os.path.join(dataset_path, image_folder_name, current_alphabet, current_character)
     
     # first image
@@ -261,7 +267,7 @@ def get_one_shot_batch(support_set_size, is_validation):
         current_character = different_characters[index]
         available_images = (dictionary[current_alphabet])[current_character]
         image_path = os.path.join(dataset_path, image_folder_name, current_alphabet, current_character)
-        image_indexes = random.sample(range(0, 19), 1)
+        image_indexes = random.sample(range(0, 20), 1)
         image = os.path.join(image_path, available_images[image_indexes[0]])
         batch_images_path.append(image)
         
@@ -276,6 +282,7 @@ def one_shot_test(model, support_set_size, number_of_tasks_per_alphabet, is_vali
     
     """
     one shot task performance evaluation
+
     input:
     support_set_size: number of **characters** to use in the support set for one-shot tasks
     number_of_tasks_per_alphabet: number of iterations in running validation or testing for each alphabet 
