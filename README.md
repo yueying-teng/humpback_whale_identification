@@ -24,7 +24,7 @@ If the features learned by the model are sufficient to confirm or deny the ident
 
 
 ### training
-from the 30 alphabets background set, 80% (24) are used for training and 20% (6) are using for validation one-shot tasks
+from the 30 alphabets background set, 80% (24) are used for training and 20% (6) are used for one-shot task validation
 
 - training consists of classifying pairs of images to be the same or different characters. there are equal number of same and different character pairs for each alphabet
 - in validation, the testing image is paired with each one of the support set images. the pair with the highest probability output is considered the class for the testing image.
@@ -79,6 +79,8 @@ each batch is made of support_set_size pairs images. for both validation and tes
 - first select two images from one character under the current alphabet
 - second select one image from charcters different from the one used in pair before. this number of images is decided by support_set_size
 - reorder the images so that the pairs have the following fashion: (A, A), (A, B), (A, C), (A, D)...
+- before reorder, pairs of images look like: (A, A), (B, C), (D, E), (F, G)...
+
 
 
 
